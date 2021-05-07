@@ -27,9 +27,9 @@ provider:
     TOPIC_NAME: !Ref ContactReceivedTopic
 
 custom: # Sevice parameters
-  bucket-name: dhaval.appgambit.com
-  table-name: contacts
-  hosted-zone-id: 'Z1EQXQS56ZMQRA'
+  bucket-name: dhaval.appgambit.com # If you want to register with Route53
+  hosted-zone-id: 'Z1EQXQS56ZMQRA' # If you want to register with Route53
+  table-name: contacts  
   contact-received-topic: 'contact-received-email'
 
 functions: # Lambda functions
@@ -79,7 +79,7 @@ resources: # AWS Resources
         CloudFrontOriginAccessIdentityConfig:
           Comment: !Sub 'OriginAccessIdentity for ${S3SiteBucket}'
 
-    BucketPolicy: 
+    BucketPolicy: # Allow site access from CloudFront only
       DependsOn: OriginAccessIdentity
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -164,7 +164,7 @@ resources: # AWS Resources
         DisplayName: 'Contact received email'
         TopicName: ${self:service}-${self:provider.stage}-${self:custom.contact-received-topic}
 
-    WebsiteDNSName:
+    WebsiteDNSName: # Registger sub-domain with Route53
       DependsOn: CloudFrontDistro
       Type: 'AWS::Route53::RecordSetGroup'
       Properties:
