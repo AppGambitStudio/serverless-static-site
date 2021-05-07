@@ -30,6 +30,7 @@ custom: # Sevice parameters
   bucket-name: ${file(./config.${opt:stage, 'dev'}.json):BUCKET_NAME} # S3 Bucket Name
   table-name: ${file(./config.${opt:stage, 'dev'}.json):TABLE_NAME} # DynamoDB Table Name
   contact-received-topic: ${file(./config.${opt:stage, 'dev'}.json):CONTACT_RECEIVED_TOPIC} # SNS Topic Name
+  forward-email: ${file(./config.${opt:stage, 'dev'}.json):FORWARD_EMAIL} # SNS Topic Email Subscription
   acm-cert-arn: ${file(./config.${opt:stage, 'dev'}.json):ACM_CERT_ARN} # ACM Certificate ID
   hosted-zone-id: ${file(./config.${opt:stage, 'dev'}.json):HOSTED_ZONE_ID} # If you want to register with Route53
 
@@ -180,6 +181,9 @@ resources: # AWS Resources
       Properties:
         DisplayName: 'Contact received email'
         TopicName: ${self:service}-${self:provider.stage}-${self:custom.contact-received-topic}
+        Subscription:
+        - Endpoint: ${self:custom.forward-email}
+          Protocol: email
 
     WebsiteDNSName: # Registger Domain with Route53
       DependsOn: CloudFrontDistro

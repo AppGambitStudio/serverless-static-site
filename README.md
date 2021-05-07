@@ -42,8 +42,25 @@ To push the Site specific changes (Html, CSS, JS etc)
 aws s3 sync app/ s3://<bucket name>
 ```
 
-### Clean up
+### CloudFront Cache Invalidation 
+After deploying the service, if you are just pushing the change to your site. The CloudFront distribution will take some time update the cached content. To immediately update the CloudFront, you will need to `invalidate` the cache. 
 
+Go to your CloudFront console and copy the Distribution ID created through this service and run the following command. Please note that the following command will clear the whole cache. You can clear the selective files using `--paths` as well. 
+
+```
+aws cloudfront create-invalidation --distribution-id <ID> --paths /*
+```
+
+For more detail check the documentation here - https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html
+
+### SNS Email Subscription
+When someone fillup the contact form in the UI. The API will save the data to DynamoDB and also publish a message in the configured SNS Topic. The SNS Topic also has an Email subscription, where you can put the email where you want to receive the message detail. 
+
+After you deploy the service, you will receive the confirmation email from AWS to activate your subscription. Please follow the instructions in the email. 
+
+For more detail check the documentation here - https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html
+
+### Clean up
 Clear the Site bucket content first.
 
 ```
