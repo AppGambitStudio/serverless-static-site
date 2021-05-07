@@ -14,9 +14,9 @@ Before you deploy, go to the `serverless.yml` file and check the configuration v
 
 ```
 custom: # Sevice parameters
-  bucket-name: dhaval.appgambit.com
-  table-name: contacts
-  hosted-zone-id: 'Z1EQXQS56ZMQRA'
+  bucket-name: dhaval.appgambit.com # If you want to register with Route53
+  hosted-zone-id: 'Z1EQXQS56ZMQRA' # If you want to register with Route53
+  table-name: contacts  
   contact-received-topic: 'contact-received-email'
 ```
 
