@@ -1,6 +1,6 @@
 ![alt text](./assets/diagram.png)
 
-# Host static site using Serverless Framework and AWS
+# Host Static Site with AWS and Serverless Framework
 This application creates various AWS resources to host a Single Page Application. The application also has a Contact Form to save the contact data into database and also send out email to the author of the application.
 
 AWS Services used in this application.
