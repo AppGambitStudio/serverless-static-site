@@ -1,0 +1,7 @@
+{
+    "BUCKET_NAME": "",
+    "TABLE_NAME": "contacts",
+    "CONTACT_RECEIVED_TOPIC": "contact-received-email",
+    "ACM_CERT_ARN": "arn:aws:acm:us-east-1:<AWS ACCOUNT>:certificate/<CERTIFICATION ID>",
+    "HOSTED_ZONE_ID": "" 
+}

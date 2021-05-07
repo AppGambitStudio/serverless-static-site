@@ -27,12 +27,11 @@ provider: # Basic configuration with IAM Role for Lambda
     TOPIC_NAME: !Ref ContactReceivedTopic
 
 custom: # Sevice parameters  
-  bucket-name: newarc.io # If you want to register with Route53
-  table-name: contacts  
-  contact-received-topic: 'contact-received-email'  
-  acm-cert-arn: ''
-
-  # hosted-zone-id: 'Z1EQXQS56ZMQRA' # If you want to register with Route53
+  bucket-name: ${file(./config.${opt:stage, 'dev'}.json):BUCKET_NAME} # S3 Bucket Name
+  table-name: ${file(./config.${opt:stage, 'dev'}.json):TABLE_NAME} # DynamoDB Table Name
+  contact-received-topic: ${file(./config.${opt:stage, 'dev'}.json):CONTACT_RECEIVED_TOPIC} # SNS Topic Name
+  acm-cert-arn: ${file(./config.${opt:stage, 'dev'}.json):ACM_CERT_ARN} # ACM Certificate ID
+  hosted-zone-id: ${file(./config.${opt:stage, 'dev'}.json):HOSTED_ZONE_ID} # If you want to register with Route53
 
 package: # Remove files that are not needed in Lambda package
   individually: true
@@ -181,19 +180,19 @@ resources: # AWS Resources
         DisplayName: 'Contact received email'
         TopicName: ${self:service}-${self:provider.stage}-${self:custom.contact-received-topic}
 
-    # WebsiteDNSName: # Registger sub-domain with Route53
-    #   DependsOn: CloudFrontDistro
-    #   Type: 'AWS::Route53::RecordSetGroup'
-    #   Properties:
-    #     HostedZoneId: ${self:custom.hosted-zone-id}
-    #     RecordSets:
-    #       - Name: ${self:custom.bucket-name}
-    #         Type: A
-    #         AliasTarget:
-    #           HostedZoneId: 'Z2FDTNDATAQYW2'
-    #           DNSName: !GetAtt 
-    #             - CloudFrontDistro
-    #             - DomainName      
+    WebsiteDNSName: # Registger Domain with Route53
+      DependsOn: CloudFrontDistro
+      Type: 'AWS::Route53::RecordSetGroup'
+      Properties:
+        HostedZoneId: ${self:custom.hosted-zone-id}
+        RecordSets:
+          - Name: ${self:custom.bucket-name}
+            Type: A
+            AliasTarget:
+              HostedZoneId: 'Z2FDTNDATAQYW2'
+              DNSName: !GetAtt 
+                - CloudFrontDistro
+                - DomainName      
 
   Outputs:
     WebsiteURL:
