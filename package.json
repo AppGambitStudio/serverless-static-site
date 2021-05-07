@@ -1,0 +1,16 @@
+{
+  "name": "static-site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "s3-sync": "aws s3 sync app/ s3://<bucket name>",
+    "s3-clean": "aws s3 rm s3://<bucket name> --recursive",
+    "cf-invalidate": "aws cloudfront create-invalidation --distribution-id <ID> --paths /*"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-export-outputs": "^1.0.2"
+  }
+}

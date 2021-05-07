@@ -1,0 +1,203 @@
+service: static-app
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  lambdaHashingVersion: '20201221'
+  iam: # For Lambda to write to DynamoDB
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:PutItem
+          Resource:
+            Fn::GetAtt:
+              - ContactTable
+              - Arn
+        - Effect: "Allow"
+          Action:
+            - sns:Publish
+          Resource: !Ref ContactReceivedTopic            
+  
+  environment: # For Lambda to get the DynamoDB table
+    TABLE_NAME: ${self:service}-${self:provider.stage}-${self:custom.table-name}
+    TOPIC_NAME: !Ref ContactReceivedTopic
+
+custom: # Sevice parameters
+  bucket-name: dhaval.appgambit.com
+  table-name: contacts
+  hosted-zone-id: 'Z1EQXQS56ZMQRA'
+  contact-received-topic: 'contact-received-email'
+
+functions: # Lambda functions
+  contact:
+    handler: functions/contact.handler
+    events:
+      - http:
+          path: contact
+          method: POST
+          cors: true
+
+resources: # AWS Resources
+  Resources:    
+
+    S3SiteBucket: # Host website content in this bucket
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucket-name}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+              AllowedOrigins:
+                - '*'
+              ExposedHeaders:
+                - Date
+              Id: myCORSRuleId1
+              MaxAge: 3600        
+    
+    ContactTable: # For holding the contact form detail
+      Type: AWS::DynamoDB::Table      
+      Properties:
+        TableName: !Sub ${self:service}-${self:provider.stage}-${self:custom.table-name}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+
+    OriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: !Sub 'OriginAccessIdentity for ${S3SiteBucket}'
+
+    BucketPolicy: 
+      DependsOn: OriginAccessIdentity
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: OriginBucketPolicy
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                CanonicalUser: !GetAtt OriginAccessIdentity.S3CanonicalUserId
+              Action: 's3:GetObject'
+              Resource: !Sub 'arn:aws:s3:::${S3SiteBucket}/*'
+        Bucket: !Ref S3SiteBucket
+
+    CloudFrontDistro: # To serve the website via CDN
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Origins:
+          - DomainName: ${self:custom.bucket-name}.s3.amazonaws.com
+            Id: myS3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${OriginAccessIdentity}'
+          - DomainName: !Sub '${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com'
+            Id: ApiGatewayOrigin
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only            
+          Enabled: 'true'
+          Comment: 'My Static Website Distro'
+          DefaultRootObject: index.html          
+          DefaultCacheBehavior:            
+            AllowedMethods:
+              - GET
+              - HEAD
+              - DELETE
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            Compress: true
+            DefaultTTL: 300
+            ForwardedValues:
+              Headers:
+                - Accept
+                - Referer
+                - Authorization
+                - Content-Type
+              QueryString: true
+            MaxTTL: 300
+            TargetOriginId: myS3Origin
+            ViewerProtocolPolicy: https-only
+          CacheBehaviors:
+            - TargetOriginId: ApiGatewayOrigin
+              AllowedMethods:
+                - DELETE
+                - GET
+                - HEAD
+                - OPTIONS
+                - PATCH
+                - POST
+                - PUT
+              PathPattern: /dev/*
+              ViewerProtocolPolicy: https-only
+              ForwardedValues:
+                QueryString: false
+            - TargetOriginId: myS3Origin
+              PathPattern: '*'
+              ViewerProtocolPolicy: redirect-to-https
+              ForwardedValues:
+                QueryString: false
+          PriceClass: 'PriceClass_100'          
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: 'true'                  
+    
+    ContactReceivedTopic: # drop message when a new contact message is received
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: 'Contact received email'
+        TopicName: ${self:service}-${self:provider.stage}-${self:custom.contact-received-topic}
+
+    WebsiteDNSName:
+      DependsOn: CloudFrontDistro
+      Type: 'AWS::Route53::RecordSetGroup'
+      Properties:
+        HostedZoneId: ${self:custom.hosted-zone-id}
+        RecordSets:
+          - Name: ${self:custom.bucket-name}
+            Type: A
+            AliasTarget:
+              HostedZoneId: 'Z2FDTNDATAQYW2'
+              DNSName: !GetAtt 
+                - CloudFrontDistro
+                - DomainName      
+
+  Outputs:
+    WebsiteURL:
+      Value: !GetAtt 
+        - S3SiteBucket
+        - WebsiteURL
+      Description: URL for website hosted on S3    
+    S3BucketSecureURL:
+      Value: !Join 
+        - ''
+        - - 'https://'
+          - !GetAtt 
+            - S3SiteBucket
+            - DomainName
+      Description: Name of S3 bucket to hold website content    
+    CloudFrontDistro:
+      Value: !Join 
+        - ''
+        - - 'https://'
+          - !GetAtt 
+            - CloudFrontDistro
+            - DomainName
+    ContactsTable:
+      Value: !Ref 'ContactTable'
