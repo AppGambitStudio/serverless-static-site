@@ -15,7 +15,7 @@ AWS Services used in this application.
 * SNS - For Sending Email to Author when someone submits contact message
 
 ### Route53 Domain Name Configuration
-For this demo I am using my Namecheap domain name routed to Amazon Route53 so that I can use the HTTPS certification without extra fuss. You can follow this link to configure the Namecheap to Route53 redirection and ACM for the SSL certifice. 
+For this demo I am using my Namecheap domain name routed to Amazon Route53 so that I can use the HTTPS certification without extra fuss. You can follow this link to configure the Namecheap to Route53 redirection and ACM for the SSL certificate. 
 
 https://benjamincongdon.me/blog/2017/06/13/How-to-Deploy-a-Secure-Static-Site-to-AWS-with-S3-and-CloudFront/
 
