@@ -41,6 +41,7 @@ package: # Remove files that are not needed in Lambda package
     - .gitignore
     - '*.md'
     - node_modules/**
+    - assets/**
 
 functions: # Lambda functions
   contact:

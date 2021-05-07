@@ -2,3 +2,6 @@ node_modules
 .serverless
 *.bck
 config.*
+assets/**
+.DS_Store
+**/.DS_Store
