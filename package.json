@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "s3-sync": "aws s3 sync app/ s3://dhaval.appgambit.com",
-    "s3-clean": "aws s3 rm s3://dhaval.appgambit.com --recursive",
+    "s3-sync": "aws s3 sync app/ s3://newarc.io",
+    "s3-clean": "aws s3 rm s3://newarc.io --recursive",
     "cf-invalidate": "aws cloudfront create-invalidation --distribution-id <ID> --paths /*"
   },
   "author": "",

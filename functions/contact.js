@@ -8,7 +8,6 @@ module.exports.handler = function (event, context, callback) {
     console.log(event.body); // Contains incoming request data (e.g., query params, headers and more)
     const body = JSON.parse(event.body);
 
-
     const response = {
         statusCode: 200,
         headers: {

@@ -27,9 +27,11 @@ provider: # Basic configuration with IAM Role for Lambda
     TOPIC_NAME: !Ref ContactReceivedTopic
 
 custom: # Sevice parameters  
-  bucket-name: dhaval.appgambit.com # If you want to register with Route53
+  bucket-name: newarc.io # If you want to register with Route53
   table-name: contacts  
   contact-received-topic: 'contact-received-email'  
+  acm-cert-arn: ''
+
   # hosted-zone-id: 'Z1EQXQS56ZMQRA' # If you want to register with Route53
 
 package: # Remove files that are not needed in Lambda package
@@ -57,6 +59,8 @@ resources: # AWS Resources
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.bucket-name}
+        WebsiteConfiguration:          
+          IndexDocument: index.html
         CorsConfiguration:
           CorsRules:
             - AllowedHeaders:
@@ -119,6 +123,8 @@ resources: # AWS Resources
           Enabled: 'true'
           Comment: 'My Static Website Distro'
           DefaultRootObject: index.html          
+          Aliases:
+            - ${self:custom.bucket-name}
           DefaultCacheBehavior:            
             AllowedMethods:
               - GET
@@ -165,7 +171,9 @@ resources: # AWS Resources
                 QueryString: false
           PriceClass: 'PriceClass_100'          
           ViewerCertificate:
-            CloudFrontDefaultCertificate: 'true'                  
+            AcmCertificateArn: ${self:custom.acm-cert-arn}
+            MinimumProtocolVersion: TLSv1.2_2018
+            SslSupportMethod: sni-only
     
     ContactReceivedTopic: # drop message when a new contact message is received
       Type: AWS::SNS::Topic
