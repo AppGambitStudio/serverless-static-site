@@ -27,6 +27,7 @@ Before you deploy, create the `config.dev.json` from the `sample.config.json` fi
     "BUCKET_NAME": "S3 bucket name. For example, mysite.com",
     "TABLE_NAME": "DynamoDB table name",
     "CONTACT_RECEIVED_TOPIC": "contact-received-email",
+    "FORWARD_EMAIL": "Email where you want to receive contact message",
     "ACM_CERT_ARN": "arn:aws:acm:us-east-1:<AWS ACCOUNT>:certificate/<CERTIFICATION ID>",
     "HOSTED_ZONE_ID": "Route53 Hosted Zone ID" 
 }
