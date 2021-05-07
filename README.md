@@ -55,3 +55,9 @@ Remove the application stack
 ```
 sls remove --profile <your profile> --aws-region <region>
 ```
+
+### License 
+
+MIT License
+
+Copyright (c) 2021 Dhaval Nagar
