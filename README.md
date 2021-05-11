@@ -17,6 +17,10 @@ AWS Services used in this application.
 ### Route53 Domain Name Configuration
 For this demo I am using my Namecheap domain name routed to Amazon Route53 so that I can use the HTTPS certification without extra fuss. You can follow this link to configure the Namecheap to Route53 redirection and ACM for the SSL certificate. 
 
+To use an ACM certificate with Amazon CloudFront, you must request or import the certificate in the US East (N. Virginia) region. 
+
+Note: Please ensure your S3 bucket name is matching your Domain Name. For example, my domain name as `newarc.io`, so I configured my bucket name to be `newarc.io`.
+
 https://benjamincongdon.me/blog/2017/06/13/How-to-Deploy-a-Secure-Static-Site-to-AWS-with-S3-and-CloudFront/
 
 ### Deployment
